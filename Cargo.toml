@@ -6,5 +6,10 @@ edition = "2018"
 
 
 [[bin]]
-name = "hlpLib"
+name = "hlpTest"
 path = "rust/hlpFn.rs"
+
+[lib]
+name = "hlp_Lib"
+path = "rust/hlp_Lib.rs"
+crate-type = ["cdylib"]
