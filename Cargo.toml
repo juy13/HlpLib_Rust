@@ -1,0 +1,10 @@
+[package]
+name = "hlpLib"
+version = "0.0.1"
+authors = ["juy13"]
+edition = "2018"
+
+
+[[bin]]
+name = "hlpLib"
+path = "rust/hlpFn.rs"
