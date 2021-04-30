@@ -43,7 +43,7 @@ namespace = "ffi"
 
 # A list of sys headers to #include (with angle brackets)
 # default: []
-sys_includes = ["stdio", "string"]
+sys_includes = ["stdio.h", "string"]
 
 
 # Whether cbindgen's default C/C++ standard imports should be suppressed. These

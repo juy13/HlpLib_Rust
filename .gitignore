@@ -3,3 +3,8 @@
 *.exe
 *.pbd
 /.vscode/*
+/Dll_Test/x64/*
+/Dll_Test/Debug*
+/Dll_Test/Dll_Test/Debug*
+/Dll_Test/Dll_Test/x64*
+/Dll_Test/.vs*
