@@ -1,21 +1,28 @@
 // Dll_Test.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
+#include <iostream>
 #include "my_header.h"
+
+#pragma comment(lib, "userenv.lib")
+#pragma comment(lib, "ws2_32.lib")   
+ 
 
 int main()
 {
-    int i = 0;
-    hex2ascii();
+    std::cout << add_numbers(2, 3) << std::endl;
+    unsigned char arr[] = { 0x32, 0x45, 0xab, 0xFF, 0x00, 0x3C };
+    size_t size = 0;
+    int size2 = sizeof(arr);
+    char out2[200] = { 0x00 };
+   //unsigned char int = new char[200];
+    ControlHex cntr;
+    int rc = hex2ascii(size2, arr, &size, out2, cntr);
+    //std::cout << (*out) << std::endl;
+    for (int i = 0; i < size; i++)
+    {
+        std::cout << out2[i];
+    }
+    std::cout << std::endl;
 }
 
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
