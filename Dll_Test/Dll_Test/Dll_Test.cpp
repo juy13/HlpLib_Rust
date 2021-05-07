@@ -12,12 +12,12 @@ int main()
 {
     std::cout << add_numbers(2, 3) << std::endl;
     unsigned char arr[] = { 0x32, 0x45, 0xab, 0xFF, 0x00, 0x3C };
-    size_t size = 0;
+    size_t size = 200;
     int size2 = sizeof(arr);
     char out2[200] = { 0x00 };
    //unsigned char int = new char[200];
     ControlHex cntr;
-    int rc = hex2ascii(size2, arr, &size, out2, cntr);
+    int rc = hex2ascii(6, arr, &size, out2, WithOut_Space);
     //std::cout << (*out) << std::endl;
     for (int i = 0; i < size; i++)
     {

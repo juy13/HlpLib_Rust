@@ -18,20 +18,39 @@
 #include <string>
 #define VERSION 1
 
-typedef struct ControlHex {
-    int With_X         = 1;
-    int WithOut_X      = 1;
-    int With_Space     = 1;
-    int WithOut_Space  = 1;
+typedef enum ControlHex {
+    With_X          = 1,
+    With_Space      = 2,
+    WithOut_Space   = 3,
 }ControlHex;
+
+typedef enum ControlError {
+    OK           = 0,
+    ERRDat       = 1,
+    ERRLen       = 2,
+    FATErr       = 255,
+}ControlError;
 
 extern "C" int32_t add_numbers(int32_t number1, int32_t number2);
 
-extern "C" int32_t hex2ascii(size_t hex_len,
-                  unsigned char* hex_in,
-                  size_t *ascii_len,
-                  char* ascii_out,
-                  struct ControlHex control);
+
+/****************************************************************************************/
+/*                This function was made to conver bytes in string                      */
+/*  Input:                                                                              */
+/*      -- hex_len      - length of bytearray                                           */
+/*      -- hex_in       - bytearray                                                     */
+/*      -- ascii_len    - length of allocated memmory                                   */
+/*      -- control      - type of output string                                         */
+/*  Output:                                                                             */
+/*      -- ascii_out    - pointer on output string                                      */
+/*      -- ascii_len    - length of output string                                       */
+/****************************************************************************************/
+
+extern "C" ControlError hex2ascii(size_t hex_len,
+                            unsigned char* hex_in,
+                            size_t *ascii_len,
+                            char* ascii_out,
+                            ControlHex control);
 
 #endif /* mozilla_wr_bindings_h */
 
