@@ -52,6 +52,16 @@ extern "C" ControlError hex2ascii(size_t hex_len,
                             char* ascii_out,
                             ControlHex control);
 
+
+
+
+extern "C" ControlError ascii2hex(size_t ascii_len,
+                            char* ascii_in,
+                            size_t *hex_len,
+                            unsigned char* hex_out,
+                            ControlHex control);
+
+
 #endif /* mozilla_wr_bindings_h */
 
 /* Text to put at the end of the generated file */

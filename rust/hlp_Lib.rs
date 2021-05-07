@@ -105,3 +105,53 @@ pub extern fn hex2ascii(hex_len : usize, hex_in: *const u8, ascii_len : &mut usi
         }
     }
 }
+
+
+#[no_mangle]
+pub extern fn ascii2hex(ascii_len : usize, ascii_in : *const c_char, hex_len : &mut usize, hex_out : *mut u8, control : ControlHex) -> ControlError {
+
+    //let mut vec: Vec<u8> = Vec::new(); 
+
+    unsafe {
+
+        let array = std::slice::from_raw_parts(ascii_in, ascii_len);
+        println!("{:#?}", array);
+        let mut i = 0;
+
+        while i < ascii_len/2
+        {
+            let mut num;
+            
+            if array[i] <= '9' as i8{
+
+                num = (array[i] - ('0' as i8)) * 16;
+
+            }
+            else{
+
+                num = ((array[i] - ('A' as i8)) + 10) << 4;
+
+            }
+
+            if array[i + 1] <= '9'  as i8{
+
+                num |= array[i + 1] - ('0' as i8);
+
+            }
+            else{
+
+                num |= (array[i + 1] - ('A' as i8)) + 10;
+
+            }
+
+            println!("{ }", num as u8);
+            i += 2;
+        }
+
+
+    }
+
+
+
+    return ControlError::OK;
+}
