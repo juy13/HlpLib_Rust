@@ -1,7 +1,11 @@
 #[allow(non_camel_case_types)]
 #[allow(dead_code)]
+#[allow(unused_assignments)]
+
+
 use std::ffi::{CString};
-use std::os::raw::c_char;
+use std::os::raw::{c_char, c_uchar};
+use std::panic;
 
 #[repr(u8)]
 pub enum ControlHex {
@@ -107,51 +111,213 @@ pub extern fn hex2ascii(hex_len : usize, hex_in: *const u8, ascii_len : &mut usi
 }
 
 
+fn translate_a2h(a1 : i8, a2 : i8, a_out : &mut i8) -> ControlError {
+
+    panic::set_hook(Box::new(|_info| {
+        // do nothing
+    }));
+    
+        let result = panic::catch_unwind(|| {
+                let mut num;
+
+                if a1 <= '9' as i8{
+                    num = (a1 - ('0' as i8)) * 16;
+                }
+                else{
+                    num = ((a1 - ('A' as i8)) + 10) << 4;
+                }
+    
+                if a2 <= '9'  as i8{
+                    num |= a2 - ('0' as i8);
+                }
+                else{
+                    num |= (a2 - ('A' as i8)) + 10;
+                }
+                num
+        });
+
+        match result {
+            Ok(res) => {
+                *a_out = res; 
+                return ControlError::OK;
+            },
+            Err(_) => return ControlError::FATErr,
+        }
+}
+
+fn translate_a2na(ascii_in : &[i8], ascii_len : &mut usize, ascii_out : &mut Vec<i8>, control : ControlHex) -> ControlError{
+
+
+    let mut out_str: Vec<i8> = Vec::new(); 
+    let mut i = 0;
+    let mut flag = 0;
+
+    match control {
+
+        ControlHex::With_Space => {
+
+            while i < *ascii_len {
+
+                if i % 1 == 0 {
+                    out_str.push(ascii_in[i]);
+                    i += 1;
+                    continue;
+                }
+                if i % 2 == 0 {
+                    out_str.push(ascii_in[i]);
+                    i += 1;
+                    continue;
+                }
+                if i % 3 == 0 {
+                    i += 1;
+                    continue;
+                }
+
+            }       
+            println!("Out of With_Space: {:?}", out_str);
+            *ascii_len = out_str.len();
+            *ascii_out = out_str;
+            return ControlError::OK
+        }
+
+        ControlHex::With_X => {
+
+            println!("Len: {:?}", *ascii_len);
+            while i < *ascii_len {
+
+                match flag {
+
+                    0 => {
+                        flag += 1;
+                        i += 1;
+                        continue;
+                    }
+                    1 => {
+                        flag += 1;
+                        i += 1;
+                        continue;
+                    }
+                    2 => {
+                        flag += 1;
+                        out_str.push(ascii_in[i]);
+                        i += 1;
+                        continue;
+                    }
+                    3 => {
+                        flag += 1;
+                        out_str.push(ascii_in[i]);
+                        i += 1;
+                        continue;
+                    }
+                    4 => {
+                        flag += 1;
+                        i += 1;
+                        continue;
+                    }
+                    5 => {
+                        flag = 0;
+                        i += 1;
+                        continue;
+                    }
+                    _ => return ControlError::FATErr
+                }
+
+            }            
+            println!("Out of With_X: {}", out_str.len());
+            *ascii_len = out_str.len();
+            *ascii_out = out_str;
+            return ControlError::OK
+        }
+
+        ControlHex::WithOut_Space => {
+
+            *ascii_out = ascii_in.to_vec();
+            return ControlError::OK
+        }
+
+        _ => return ControlError::ERRDat
+
+    } 
+}
+
+
+/****************************************************************************************/
+/*          This function was made to convert ascii hex string in hexdemical            */
+/*  Input:                                                                              */
+/*      -- ascii_len    - length of ascii hex string                                    */
+/*      -- ascii_in     - ascii hex string                                              */
+/*      -- hex_len      - length of allocated memmory                                   */
+/*      -- control      - type of output string                                         */
+/*  Output:                                                                             */
+/*      -- hex_out    - pointer on output bytearray                                     */
+/*      -- hex_len    - length of output bytearray                                      */
+/****************************************************************************************/
+
 #[no_mangle]
 pub extern fn ascii2hex(ascii_len : usize, ascii_in : *const c_char, hex_len : &mut usize, hex_out : *mut u8, control : ControlHex) -> ControlError {
 
-    //let mut vec: Vec<u8> = Vec::new(); 
+    let mut vec: Vec<u8> = Vec::new(); 
+    let mut array_norm: Vec<i8> = Vec::new();
+    let mut rc;
+    let mut vec_len = ascii_len;
 
     unsafe {
 
-        let array = std::slice::from_raw_parts(ascii_in, ascii_len);
-        println!("{:#?}", array);
-        let mut i = 0;
+        if let Some(ascii_in) = ascii_in.as_ref() {
+            if let Some(hex_out) = hex_out.as_mut() {
 
-        while i < ascii_len/2
-        {
-            let mut num;
-            
-            if array[i] <= '9' as i8{
+                let array = std::slice::from_raw_parts(ascii_in, ascii_len);
+                rc = translate_a2na(array, &mut vec_len, &mut array_norm, control);
+                match rc {
 
-                num = (array[i] - ('0' as i8)) * 16;
+                    ControlError::OK => {
+
+                        println!("{:#?}", array);
+                        let mut i = 0;
+                
+                        while i < vec_len
+                        {
+                            let mut num : i8 = 0;
+                            rc = translate_a2h(array_norm[i], array_norm[i+1], &mut num);
+                            match rc {
+                
+                                ControlError::OK => { 
+                                    vec.push(num as u8);
+                                    i += 2;
+                                }
+                
+                                _ => return rc
+                
+                            }
+                            
+                        }
+                
+                        if *hex_len < vec.len() {
+                            return ControlError::ERRLen
+                        }
+                        else
+                        {
+                            *hex_len = vec.len();
+                            //println!("{ }", vec.len());
+                            std::ptr::copy(vec.as_ptr(), hex_out, *hex_len);
+                            return ControlError::OK 
+                        }
+
+                    }
+                    _ => return rc
+
+                }
 
             }
-            else{
-
-                num = ((array[i] - ('A' as i8)) + 10) << 4;
-
+            else{ 
+                return ControlError::ERRDat
             }
 
-            if array[i + 1] <= '9'  as i8{
-
-                num |= array[i + 1] - ('0' as i8);
-
-            }
-            else{
-
-                num |= (array[i + 1] - ('A' as i8)) + 10;
-
-            }
-
-            println!("{ }", num as u8);
-            i += 2;
+        }
+        else{ 
+            return ControlError::ERRDat
         }
 
-
     }
-
-
-
-    return ControlError::OK;
 }
+

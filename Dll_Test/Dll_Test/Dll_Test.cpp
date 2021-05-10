@@ -7,7 +7,7 @@
 #pragma comment(lib, "userenv.lib")
 #pragma comment(lib, "ws2_32.lib")   
 
-int a2h(char* ascii_ptr, unsigned char* hex_ptr, int len);
+//int a2h(char* ascii_ptr, unsigned char* hex_ptr, int len);
 
 int main()
 {
@@ -27,19 +27,12 @@ int main()
     }
     std::cout << std::endl;
 
+    size2 = size;
+    //size = 200;
 
-    ascii2hex(size * 2, out2, &size, arr, WithOut_Space);
+    std::cout << "Ans: " << ascii2hex(size2, out2, &size, out1, WithOut_Space) << std::endl;
+
+    std::cout << memcmp(out1, arr, size) << std::endl;
 
 }
 
-//int a2h(char* ascii_ptr, unsigned char* hex_ptr, int len)
-//{
-//    for (int i = 0; i < (len / 2); i++)
-//    {
-//
-//        *(hex_ptr + i) = (*(ascii_ptr + (2 * i)) <= '9') ? ((*(ascii_ptr + (2 * i)) - '0') * 16) : (((*(ascii_ptr + (2 * i)) - 'A') + 10) << 4);
-//        *(hex_ptr + i) |= (*(ascii_ptr + (2 * i) + 1) <= '9') ? (*(ascii_ptr + (2 * i) + 1) - '0') : (*(ascii_ptr + (2 * i) + 1) - 'A' + 10);
-//
-//    }
-//    return 0;
-//}
