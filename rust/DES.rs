@@ -123,3 +123,195 @@ const PC1: [i32; 56] = [
       2,  8, 24, 14, 32, 27,  3,  9,
      19, 13, 30,  6, 22, 11,  4, 25
  ];
+
+ const FIRSTBIT : u64 = 0x8000000000000000;
+
+ fn addbit(block : &mut u64, from : u64, position_from : i32, position_to : i32){
+
+     if(((from << (position_from)) & FIRSTBIT) != 0)
+     {
+         *block = *block + (FIRSTBIT >> position_to);
+     }
+
+ }
+
+
+fn Permutation(data : &mut u64, initial : bool)
+{
+    let mut data_temp : u64 = 0;
+    for ii in 0..64 {
+        
+        if(initial){
+            addbit(&mut data_temp, *data, InitialPermutation[ii] - 1, (ii as i32));
+        }
+        else{
+             addbit(&mut data_temp, *data, FinalPermutation[ii] - 1, (ii as i32));
+        }
+    }
+    *data = data_temp;
+}
+
+
+fn key_private_verify(key : u64) -> bool {
+
+    let mut parity_bit : i32 = 0;
+
+    for ii in 0..64{
+
+        if ii % 8 == 7 {
+
+            if parity_bit == 0 {
+
+                if((( key << ii ) & FIRSTBIT ) != (0 as u64)) {
+                    println!("Parity arror at bit #{} \n", ii + 1);
+                    return false
+                }
+            }
+            else {
+
+                 if((( key << ii ) & FIRSTBIT ) != FIRSTBIT) {
+                    println!("Parity arror at bit #{} \n", ii + 1);
+                    return false
+                }
+            }
+            parity_bit = 0;
+        }
+        else {
+
+            if((( key << ii ) & FIRSTBIT ) != FIRSTBIT) {
+                parity_bit = if parity_bit == 0 { 1 } else { 0 };
+                
+            }
+
+        }
+    }
+    return true
+}
+
+
+fn key_schedule(key : &mut u64, next_key : &mut u64, round : i32)
+{
+    let mut key_left : u64 = 0;
+    let mut key_right : u64 = 0;
+
+    let mut key_left_temp : u64 = 0;
+    let mut key_right_tempk : u64 = 0;
+
+    *next_key = 0;
+
+    if round == 0 
+    {
+        for ii in 0..56 
+        {
+
+            if ii < 28 
+            {
+                addbit(&mut key_left, *key, PC1[ii] - 1, (ii as i32));
+            }
+            else
+            {
+                addbit(&mut key_right, *key, PC1[ii] - 1, (ii as i32) % 28 );
+            }
+
+        }
+    }
+    else
+    {
+        for ii in 0..56 
+        {
+
+            if ii < 28 
+            {
+                addbit(&mut key_left, *key, ii, (ii as i32));
+            }
+            else
+            {
+                addbit(&key_right, *key, ii, (ii as i32) % 28 );
+            }
+
+        }
+    }
+
+    key_left_temp = if Rotations[round] == 1 { FIRSTBIT } else { 0xC000000000000000 };
+    key_right_temp = if Rotations[round] == 1 { FIRSTBIT } else { 0xC000000000000000 };
+    key_left_temp = (key_left & key_left_temp) >> (28 - Rotations[round]);
+    key_right_temp = (key_right & key_right_temp) >> (28 - Rotations[round]);
+
+    key_right_temp = key_right_temp + (key_right << Rotations[round]);
+    key_left_temp = key_left_temp + (key_left << Rotations[round]);
+
+    for ii in 0..56
+    {
+        if ii < 28 
+        {
+            addbit(&mut key_left, *key, ii, (ii as i32));
+        }
+        else
+        {
+            addbit(&key_right, *key, (ii as i32) % 28, (ii as i32));
+        }
+    }
+
+    *key = 0;
+
+    for ii in 0..48
+    {
+        addbit(key, &next_key, PC2[ii] - 1, ii);
+    }
+}
+
+fn rounds(data : &mut u64, key : u64)
+{
+    let mut right_block : u64 = 0;
+    let mut right_block_temp = 0;
+
+    for ii in 0..48
+    {
+        addbit(&mut right_block, &data, (DesExpansion[ii] + 31), (ii as i32));
+    }
+
+    right_block = right_block ^ key;
+
+    let mut coordx : i32 = 0;
+    let mut coordy : i32 = 0;
+    let mut substitued : u64 = 0;
+
+    for ii in 0..8
+    {
+        coordx = if (( right_block << 6 * ii) & FIRSTBIT) == FIRSTBIT { 2 } else { 0 };
+        if (right_block << (6 * ii + 5)) & FIRSTBIT == FIRSTBIT
+        {
+            coordx = coordx + 1;
+        }
+
+        coordy = 0;
+        for jj in 1..5
+        {
+            if (right_block << (6 * ii + jj)) & FIRSTBIT == FIRSTBIT
+            {
+                coordy = coordy + 2^(4 - jj);
+            }
+        }
+        
+        substitued = DesSbox[ii][coordx][coordy];
+        substitued = substitued << (60 - (4 * ii));
+        right_block_temp = right_block_temp + substitued;
+    }
+
+    right_block = right_block_temp;
+    right_block_temp = 0;
+
+    for ii in 0..32
+    {
+        addbit(&mut right_block_temp, right_block, Pbox[ii] - 1, (ii as i32));
+    }
+
+    right_block = right_block_temp;
+
+    right_block = right_block ^ *data;
+
+    *data = (*data << 32) + (right_block >> 32);
+
+}
+
+
