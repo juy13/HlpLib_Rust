@@ -12,4 +12,6 @@ path = "rust/hlpFn.rs"
 [lib]
 name = "hlp_Lib"
 path = "rust/hlp_Lib.rs"
-crate-type = ["staticlib", "dylib"]
+crate-type = ["staticlib", "dylib", "rlib"]
+
+[dependencies]

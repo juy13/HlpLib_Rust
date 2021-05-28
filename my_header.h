@@ -35,7 +35,7 @@ extern "C" int32_t add_numbers(int32_t number1, int32_t number2);
 
 
 /****************************************************************************************/
-/*                This function was made to conver bytes in string                      */
+/*                This function was made to convert bytes in string                      */
 /*  Input:                                                                              */
 /*      -- hex_len      - length of bytearray                                           */
 /*      -- hex_in       - bytearray                                                     */
@@ -54,6 +54,17 @@ extern "C" ControlError hex2ascii(size_t hex_len,
 
 
 
+/****************************************************************************************/
+/*          This function was made to convert ascii hex string in hexdemical            */
+/*  Input:                                                                              */
+/*      -- ascii_len    - length of ascii hex string                                    */
+/*      -- ascii_in     - ascii hex string                                              */
+/*      -- hex_len      - length of allocated memmory                                   */
+/*      -- control      - type of output string                                         */
+/*  Output:                                                                             */
+/*      -- hex_out    - pointer on output bytearray                                     */
+/*      -- hex_len    - length of output bytearray                                      */
+/****************************************************************************************/
 
 extern "C" ControlError ascii2hex(size_t ascii_len,
                             char* ascii_in,

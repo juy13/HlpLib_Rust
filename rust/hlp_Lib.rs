@@ -2,10 +2,15 @@
 #[allow(dead_code)]
 #[allow(unused_assignments)]
 
-
+//use DES::*;
 use std::ffi::{CString};
 use std::os::raw::{c_char, c_uchar};
 use std::panic;
+use std::mem;
+
+mod DES;
+//use crate::DES;
+// use DES::*;
 
 #[repr(u8)]
 pub enum ControlHex {
@@ -110,7 +115,8 @@ pub extern fn hex2ascii(hex_len : usize, hex_in: *const u8, ascii_len : &mut usi
     }
 }
 
-
+// TODO here is some troubles with string
+// "57 49 41 33 25 17 09 01 58 50 42 34 26 18 10 02 59 51 43 35 27 19 11 03 60 52 44 36 63 55 47 39 31 23 15 07 62 54 46 38 30 22 14 06 61 53 45 37 29 21 13 05 28 20 12 04""
 fn translate_a2h(a1 : i8, a2 : i8, a_out : &mut i8) -> ControlError {
 
     panic::set_hook(Box::new(|_info| {
@@ -158,7 +164,7 @@ fn translate_a2na(ascii_in : &[i8], ascii_len : &mut usize, ascii_out : &mut Vec
 
             while i < *ascii_len {
 
-                if i % 1 == 0 {
+                if i % 1 == 0 {                 //I think it's a wrong way....
                     out_str.push(ascii_in[i]);
                     i += 1;
                     continue;
@@ -321,3 +327,7 @@ pub extern fn ascii2hex(ascii_len : usize, ascii_in : *const c_char, hex_len : &
     }
 }
 
+#[test]
+fn testDES() {
+    println!("Result {:#?}", DES::DesSbox[0][0][1]);
+}
