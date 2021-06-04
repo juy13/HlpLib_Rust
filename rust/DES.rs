@@ -126,6 +126,33 @@ const PC1: [i32; 56] = [
 
  const FIRSTBIT : u64 = 0x8000000000000000;
 
+
+ #[test]
+ fn desenc()
+ {
+    let key : u64 = 0;
+
+    let mut a_key: [u64; 16] = [0x00; 16];
+    a_key[0] = key;
+    let mut next_key : u64 = 0;
+
+    for ii in 0..16
+    {
+        key_schedule(&mut a_key[ii], &mut next_key, ii as i32);
+
+        if ii != 15
+        {
+            a_key[ii + 1] = next_key;
+            println!("{}", a_key[ii + 1]);
+        }
+            
+    }
+
+
+
+ }
+
+
  fn addbit(block : &mut u64, from : u64, position_from : i32, position_to : i32){
 
      if ((from << (position_from)) & FIRSTBIT) != 0
@@ -141,7 +168,7 @@ fn Permutation(data : &mut u64, initial : bool)
     let mut data_temp : u64 = 0;
     for ii in 0..64 {
         
-        if(initial){
+        if initial {
             addbit(&mut data_temp, *data, InitialPermutation[ii] - 1, (ii as i32));
         }
         else{
@@ -256,7 +283,7 @@ fn key_schedule(key : &mut u64, next_key : &mut u64, round : i32)
 
     for ii in 0..48
     {
-        addbit(key, next_key, PC2[ii] - 1, ii as i32);
+        addbit(key, *next_key, PC2[ii] - 1, ii as i32);
     }
 }
 
@@ -267,7 +294,7 @@ fn rounds(data : &mut u64, key : u64)
 
     for ii in 0..48
     {
-        addbit(&mut right_block, data, DesExpansion[ii] + 31, ii as i32);
+        addbit(&mut right_block, *data, DesExpansion[ii] + 31, ii as i32);
     }
 
     right_block = right_block ^ key;
